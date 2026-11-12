@@ -47,6 +47,7 @@ public class TransactionDispatchService {
 
         // Persist Central OUT_MESSAGE
         OutMessage outMessage = OutMessage.builder()
+                .createdAt(now)
                 .refNo(refNo)
                 .clientId(principal.getClientId())
                 .requestType(request.getRequestType())
@@ -71,6 +72,7 @@ public class TransactionDispatchService {
             if (request.getOperations().getEmail() != null) {
                 for (var emailOp : request.getOperations().getEmail()) {
                     OutMessageEmail email = OutMessageEmail.builder()
+                            .createdAt(now)
                             .outMessageId(outMessage.getId())
                             .refNo(refNo)
                             .clientId(principal.getClientId())
@@ -89,6 +91,7 @@ public class TransactionDispatchService {
             if (request.getOperations().getSms() != null) {
                 for (var smsOp : request.getOperations().getSms()) {
                     OutMessageSms sms = OutMessageSms.builder()
+                            .createdAt(now)
                             .outMessageId(outMessage.getId())
                             .refNo(refNo)
                             .clientId(principal.getClientId())
