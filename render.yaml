@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: communication-platform
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: starter
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PORT
+        value: 8080
+      # Wire these securely in Render Dashboard (Environment tab)
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: RABBITMQ_HOST
+        sync: false
+      - key: RABBITMQ_PORT
+        value: 5672
+      - key: RABBITMQ_USERNAME
+        sync: false
+      - key: RABBITMQ_PASSWORD
+        sync: false
+      - key: SUPABASE_STORAGE_ENDPOINT
+        sync: false
+      - key: SUPABASE_STORAGE_REGION
+        value: us-east-1
+      - key: SUPABASE_STORAGE_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: platform-documents
