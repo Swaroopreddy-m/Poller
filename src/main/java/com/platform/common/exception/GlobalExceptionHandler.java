@@ -40,8 +40,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unhandled platform exception", ex);
-        // Never leak internal stack trace to external clients
-        ApiResponse<Void> response = ApiResponse.error("An internal system error occurred. Please contact support.", null, null);
+        ApiResponse<Void> response = ApiResponse.error("Error: " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), null, null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
