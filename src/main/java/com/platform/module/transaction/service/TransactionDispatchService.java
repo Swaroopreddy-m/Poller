@@ -4,6 +4,7 @@ import com.platform.common.id.TsidGenerator;
 import com.platform.module.document.entity.OutMessageDocument;
 import com.platform.module.document.repository.OutMessageDocumentRepository;
 import com.platform.module.email.entity.OutMessageEmail;
+import com.platform.module.email.provider.EmailProvider;
 import com.platform.module.email.repository.OutMessageEmailRepository;
 import com.platform.module.sms.entity.OutMessageSms;
 import com.platform.module.sms.repository.OutMessageSmsRepository;
@@ -32,6 +33,7 @@ public class TransactionDispatchService {
     private final OutMessageSmsRepository smsRepository;
     private final OutMessageDocumentRepository documentRepository;
     private final TsidGenerator tsidGenerator;
+    private final EmailProvider emailProvider;
 
     @Transactional
     public TransactionStatusResponse dispatchTransaction(CommunicationDispatchRequest request, ClientPrincipal principal, String processingMode) {
@@ -123,16 +125,80 @@ public class TransactionDispatchService {
             }
         }
 
-        // For Synchronous mode mock/dispatch execution
+        // For Synchronous mode: execute real provider calls
         if ("SYNC".equalsIgnoreCase(processingMode)) {
-            // Mark operations executed successfully in synchronous pipeline
-            outMessage.setSuccessCount(totalServices);
-            outMessage.setCompletedCount(totalServices);
+            int successCount = 0;
+            int failedCount = 0;
+
+            // --- Dispatch Emails ---
+            if (request.getOperations() != null && request.getOperations().getEmail() != null) {
+                List<OutMessageEmail> emailRecords = emailRepository.findByRefNo(refNo);
+                for (OutMessageEmail emailRecord : emailRecords) {
+                    EmailProvider.EmailDeliveryResult result = emailProvider.sendEmail(
+                            emailRecord.getRecipientEmail(),
+                            emailRecord.getCcList(),
+                            emailRecord.getBccList(),
+                            emailRecord.getSubject(),
+                            emailRecord.getRenderedBody(),
+                            Boolean.TRUE.equals(emailRecord.getIsHtml()),
+                            null
+                    );
+                    if (result.success()) {
+                        emailRecord.setStatus("S");
+                        emailRecord.setSentAt(Instant.now());
+                        emailRecord.setProviderName(emailProvider.getProviderName());
+                        emailRecord.setProviderMessageId(result.providerMessageId());
+                        successCount++;
+                    } else {
+                        emailRecord.setStatus("F");
+                        emailRecord.setProviderName(emailProvider.getProviderName());
+                        failedCount++;
+                        log.warn("[DISPATCH] Email failed | refNo={} | to={} | error={}",
+                                refNo, emailRecord.getRecipientEmail(), result.errorMessage());
+                    }
+                    emailRepository.save(emailRecord);
+                }
+            }
+
+            // --- SMS: stub (no provider yet) ---
+            if (request.getOperations() != null && request.getOperations().getSms() != null) {
+                List<OutMessageSms> smsRecords = smsRepository.findByRefNo(refNo);
+                for (OutMessageSms smsRecord : smsRecords) {
+                    // TODO: wire real SMS provider
+                    smsRecord.setStatus("S");
+                    smsRecord.setSentAt(Instant.now());
+                    smsRepository.save(smsRecord);
+                    successCount++;
+                }
+            }
+
+            // --- Documents: stub (storage not wired yet) ---
+            if (request.getOperations() != null && request.getOperations().getDocuments() != null) {
+                List<OutMessageDocument> docRecords = documentRepository.findByRefNo(refNo);
+                for (OutMessageDocument docRecord : docRecords) {
+                    // TODO: wire document generation engine + storage
+                    docRecord.setStatus("S");
+                    documentRepository.save(docRecord);
+                    successCount++;
+                }
+            }
+
+            // Update central transaction status
+            String outcome = failedCount == 0 ? "FULL_SUCCESS"
+                    : successCount == 0 ? "FULL_FAILURE"
+                    : "PARTIAL_SUCCESS";
+
+            outMessage.setSuccessCount(successCount);
+            outMessage.setFailedCount(failedCount);
+            outMessage.setCompletedCount(successCount + failedCount);
             outMessage.setInProgressCount(0);
             outMessage.setOverallStatus("C");
-            outMessage.setCompletionOutcome("FULL_SUCCESS");
+            outMessage.setCompletionOutcome(outcome);
             outMessage.setCompletedAt(Instant.now());
             outMessageRepository.save(outMessage);
+
+            log.info("[DISPATCH] Completed | refNo={} | outcome={} | success={} | failed={}",
+                    refNo, outcome, successCount, failedCount);
         }
 
         return TransactionStatusResponse.builder()
