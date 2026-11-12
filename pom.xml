@@ -21,7 +21,7 @@
         <java.version>21</java.version>
         <!-- Dependency Versions: strictly latest stable & zero known CVEs -->
         <hypersistence-utils.version>3.8.3</hypersistence-utils.version>
-        <tsid-creator.version>5.2.6</tsid-creator.version>
+        <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <json-schema-validator.version>1.5.1</json-schema-validator.version>
         <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
         <poi.version>5.3.0</poi.version>
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-tsid</artifactId>
-            <version>${tsid-creator.version}</version>
+            <version>${hypersistence-tsid.version}</version>
         </dependency>
 
         <!-- JSON Schema Validator (Dynamic Request Validation Engine) -->
