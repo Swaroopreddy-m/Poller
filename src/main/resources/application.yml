@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: communication-platform
+  profiles:
+    active: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/platform_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+      pool-name: PlatformHikariCP
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    listener:
+      simple:
+        concurrency: 3
+        max-concurrency: 10
+        prefetch: 10
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 2000ms
+          max-interval: 10000ms
+          max-attempts: 3
+          multiplier: 2.0
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+platform:
+  storage:
+    supabase:
+      endpoint: ${SUPABASE_STORAGE_ENDPOINT:http://localhost:54321/storage/v1/s3}
+      region: ${SUPABASE_STORAGE_REGION:us-east-1}
+      access-key: ${SUPABASE_STORAGE_ACCESS_KEY:supabase-key}
+      secret-key: ${SUPABASE_STORAGE_SECRET_KEY:supabase-secret}
+      bucket-name: ${SUPABASE_STORAGE_BUCKET:platform-documents}
+      presigned-url-expiration-minutes: 15
+  security:
+    ssrf:
+      allowed-schemes:
+        - https
+      blocked-networks:
+        - 127.0.0.0/8
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 169.254.169.254/32
+  rabbitmq:
+    exchange: platform.communication.direct
+    queues:
+      email: platform.email.queue
+      sms: platform.sms.queue
+      document: platform.document.queue
+      report: platform.report.queue
+      dlq: platform.deadletter.queue
+    routing-keys:
+      email: email.dispatch
+      sms: sms.dispatch
+      document: document.generate
+      report: report.execute
+      dlq: deadletter.event
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [REF_NO:%X{refNo}] - %msg%n"
+  level:
+    root: INFO
+    com.platform: DEBUG
