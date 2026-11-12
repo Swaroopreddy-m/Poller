@@ -100,7 +100,19 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: method
 
-logging:
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  health:
+    rabbit:
+      enabled: false
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [REF_NO:%X{refNo}] - %msg%n"
   level:
