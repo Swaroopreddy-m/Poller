@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OutMessageErrorRepository extends JpaRepository<OutMessageError, OutMessageError.OutMessageErrorId> {
+public interface OutMessageErrorRepository extends JpaRepository<OutMessageError, Long> {
 
     @Query("SELECT e FROM OutMessageError e WHERE e.refNo = :refNo ORDER BY e.id ASC")
     List<OutMessageError> findByRefNo(@Param("refNo") String refNo);

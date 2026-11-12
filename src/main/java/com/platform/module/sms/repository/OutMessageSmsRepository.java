@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OutMessageSmsRepository extends JpaRepository<OutMessageSms, OutMessageSms.OutMessageSmsId> {
+public interface OutMessageSmsRepository extends JpaRepository<OutMessageSms, Long> {
     List<OutMessageSms> findByRefNo(String refNo);
 }

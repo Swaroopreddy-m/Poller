@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OutMessageEmailRepository extends JpaRepository<OutMessageEmail, OutMessageEmail.OutMessageEmailId> {
+public interface OutMessageEmailRepository extends JpaRepository<OutMessageEmail, Long> {
     List<OutMessageEmail> findByRefNo(String refNo);
 }

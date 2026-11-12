@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "out_message")
-@IdClass(OutMessage.OutMessageId.class)
 @Getter
 @Setter
 @Builder
@@ -23,7 +22,6 @@ public class OutMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Id
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -135,12 +133,4 @@ public class OutMessage {
 
     @Column(name = "archived_at")
     private Instant archivedAt;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OutMessageId implements Serializable {
-        private Long id;
-        private Instant createdAt;
-    }
 }

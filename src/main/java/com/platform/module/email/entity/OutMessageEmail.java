@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "out_message_email")
-@IdClass(OutMessageEmail.OutMessageEmailId.class)
 @Getter
 @Setter
 @Builder
@@ -22,7 +21,6 @@ public class OutMessageEmail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Id
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -79,12 +77,4 @@ public class OutMessageEmail {
 
     @Column(name = "retention_until", nullable = false)
     private Instant retentionUntil;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OutMessageEmailId implements Serializable {
-        private Long id;
-        private Instant createdAt;
-    }
 }

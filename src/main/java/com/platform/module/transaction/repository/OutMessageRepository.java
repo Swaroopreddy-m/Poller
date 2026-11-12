@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface OutMessageRepository extends JpaRepository<OutMessage, OutMessage.OutMessageId> {
+public interface OutMessageRepository extends JpaRepository<OutMessage, Long> {
 
     @Query("SELECT m FROM OutMessage m WHERE m.refNo = :refNo")
     Optional<OutMessage> findByRefNo(@Param("refNo") String refNo);

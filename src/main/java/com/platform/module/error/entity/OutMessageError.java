@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "out_message_error")
-@IdClass(OutMessageError.OutMessageErrorId.class)
 @Getter
 @Setter
 @Builder
@@ -22,7 +21,6 @@ public class OutMessageError {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Id
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -67,12 +65,4 @@ public class OutMessageError {
 
     @Column(name = "retention_until", nullable = false)
     private Instant retentionUntil;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class OutMessageErrorId implements Serializable {
-        private Long id;
-        private Instant createdAt;
-    }
 }
